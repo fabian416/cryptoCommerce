@@ -13,7 +13,7 @@ contract ShoppingTransaction {
 
     // Structure to register order details
     struct PurchaseDetail {
-        string orderUUID; // UUID or order number
+        string orderUUID; // UUID or order number.
         address buyer;    // Wallet address of the buyer
         uint256 amount;   // Amount of the transaction
         TokenType tokenUsed; // Type of token used
@@ -34,6 +34,7 @@ contract ShoppingTransaction {
         usdcToken = IERC20(_usdcAddress);
         owner = msg.sender;
     }
+
 
     function purchase(string memory orderUUID, uint256 amount, TokenType tokenType) public {
         IERC20 token;
