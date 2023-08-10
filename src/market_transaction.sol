@@ -11,17 +11,6 @@ contract ShoppingTransaction {
 
     enum TokenType { USDT, USDC }
 
-    // Structure to register order details
-    struct PurchaseDetail {
-        string orderUUID; // UUID or order number.
-        address buyer;    // Wallet address of the buyer
-        uint256 amount;   // Amount of the transaction
-        TokenType tokenUsed; // Type of token used
-    }
-
-    // Array to show a register of all the transactions
-    PurchaseDetail[] public purchaseHistory;
-
     event Purchased(string indexed orderUUID, address indexed buyer, uint256 amount, TokenType tokenUsed);
 
     modifier onlyOwner() {
@@ -54,18 +43,7 @@ contract ShoppingTransaction {
             "Transfer failed"
         );
 
-        PurchaseDetail memory newPurchase;
-        newPurchase.orderUUID = orderUUID;
-        newPurchase.buyer = msg.sender;
-        newPurchase.amount = amount;
-        newPurchase.tokenUsed = tokenType;
-
-        purchaseHistory.push(newPurchase);
-
         emit Purchased(orderUUID, msg.sender, amount, tokenType);
     }
-
-    function getPurchaseHistoryLength() public view returns (uint256) {
-        return purchaseHistory.length;
-    }
 }
+
