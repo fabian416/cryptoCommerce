@@ -35,7 +35,6 @@ contract ShoppingTransaction {
         owner = msg.sender;
     }
 
-
     function purchase(string memory orderUUID, uint256 amount, TokenType tokenType) public {
         IERC20 token;
         if (tokenType == TokenType.USDT) {
@@ -68,15 +67,5 @@ contract ShoppingTransaction {
 
     function getPurchaseHistoryLength() public view returns (uint256) {
         return purchaseHistory.length;
-    }
-
-    function setTokenAddress(TokenType tokenType, address newAddress) public onlyOwner {
-        if (tokenType == TokenType.USDT) {
-            usdtToken = IERC20(newAddress);
-        } else if (tokenType == TokenType.USDC) {
-            usdcToken = IERC20(newAddress);
-        } else {
-            revert("Invalid token type");
-        }
     }
 }
