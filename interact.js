@@ -1,39 +1,52 @@
-const Web3 = require('web3');
+const ethers = require('ethers');
+const { JsonRpcProvider } = require('ethers/providers');
+const { utils } = require('ethers');
+console.log(utils)
 const fs = require('fs');
 
-// Carga las variables de entorno
+// Load environment variables
 require('dotenv').config();
 
-console.log("Iniciando script...");
 
-// Conectar a la red Mumbai de Matic usando web3
-const web3 = new Web3(process.env.MATIC_RPC_URL);
-console.log("Conectado a la red de Matic...");
 
-// Asegúrate de que la clave privada tiene el formato adecuado
-const privateKey = process.env.PRIVATE_KEY.startsWith('0x') ? process.env.PRIVATE_KEY : '0x' + process.env.PRIVATE_KEY;
-const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-console.log("Cuenta cargada:", account.address);
+console.log("Starting script...");
 
-// Cargar el ABI de tu contrato desde el archivo
+
+// Connect to Matic's Mumbai network using ethers
+const provider = new JsonRpcProvider(process.env.MATIC_RPC_URL);
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+console.log(process.env.PRIVATE_KEY);
+console.log(wallet);
+console.log(utils); 
+console.log("Connected to Matic network...");
+console.log("Loaded account:", wallet.address);
+
 const contractData = JSON.parse(fs.readFileSync('out/market_transaction.sol/ShoppingTransaction.json', 'utf8'));
-const abi = contractData.abi;
-console.log("ABI cargado...");
+const contract = new ethers.Contract('0x00F382A1E79b4159071faF7a608bD3F987cb9501', contractData.abi, wallet);
+console.log("Contract instantiated at:", contract.address);
 
-// Instancia de tu contrato
-const contractAddress = '0x5ba1B40c2503B716BCB67c439A63BBfe3071147d';
-const contract = new web3.eth.Contract(abi, contractAddress);
-console.log("Contrato instanciado en:", contractAddress);
+async function checkBalance() {
+    let balanceWei = await wallet.getBalance();
+    let balance = ethers.utils.formatEther(balanceWei);
+    console.log(`Balance for account ${wallet.address}: ${balance} ETH (or Matic if you're on that network)`);
+}
 
-async function interact() {
+checkBalance();
+
+async function simulatePurchase() {
     try {
-        console.log("Intentando obtener la longitud del historial de compras...");
-        // Ejemplo de llamada a una función 'view' en tu contrato
-        const longitud = await contract.methods.getPurchaseHistoryLength().call();
-        console.log(`Longitud del historial de compras: ${longitud}`);
+        console.log("Making purchase...");
+        const totalToPay = utils.parseEther('25'); // Simulate a 25 USDT purchase
+        const orderUUID = "123456"; // Just an example, you should generate a unique UUID in practice
+
+        const transactionResponse = await contract.purchase(orderUUID, totalToPay, 0, { gasLimit: 2000000 }); // 0 is for USDT, 1 for USDC
+        console.log("Transaction sent. Awaiting confirmation...");
+
+        const receipt = await transactionResponse.wait();
+        console.log("Purchase successfully made. Receipt:", receipt);
     } catch (error) {
-        console.error("Se produjo un error durante la interacción:", error);
+        console.error("An error occurred during purchase simulation:", error);
     }
 }
 
-interact();
+simulatePurchase();

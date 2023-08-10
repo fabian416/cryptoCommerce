@@ -7,3 +7,7 @@ libs = ["lib"]
 remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/contracts/",
 ]
+
+[rpc_endpoints]
+mumbai = "${MATIC_RPC_URL}"
+
